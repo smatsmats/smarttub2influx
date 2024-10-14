@@ -45,7 +45,7 @@ def push_data(measurement, data, tags={}):
             "tags": tags,
             # we really should use the time from the call, but whatever
             # "time": datetime.utcfromtimestamp(int(data['ts'])).isoformat(),
-            "time": datetime.utcnow().isoformat(),
+            "time": datetime.datetime.utcnow().isoformat(),
             "fields": data,
         }
     ]
@@ -56,69 +56,99 @@ def push_data(measurement, data, tags={}):
 
 async def info_command(spas, args):
     for spa in spas:
-        print(f"= Spa '{spa.name}' =\n")
+        measurement = spa.name
+
+        if args.debug:
+            print(f"= Spa '{spa.name}' =\n")
         if args.all or args.status or args.location or args.locks:
             status = await spa.get_status()
 
         if args.all or args.status:
-            print("== Status ==")
             status_dict = status.properties.copy()
             # redact location for privacy
             location = status_dict.pop("location")
-            pp.pprint(status_dict)
-            print()
+
+            if args.debug:
+                print("== Status ==")
+                pp.pprint(status_dict)
+                print()
+
+            data2push = {}
+            data2push['status_water_temperature'] = status_dict['water']['temperature']
+            data2push['status_ambient_temperature'] = status_dict['ambientTemperature']
+            data2push['status_current_value'] = status_dict['current']['value']
+            data2push['status_current_kwh'] = status_dict['current']['kwh']
+            data2push['status_heater'] = status_dict['heater']
+            data2push['status_ozone'] = status_dict['ozone']
+            data2push['status_set_temperature'] = status_dict['setTemperature']
+            data2push['status_state'] = status_dict['state']
+            push_data(measurement, data2push, {})
 
         if args.location:
             # not included in --all
-            print(
-                f"Location: {location['latitude']} {location['longitude']} (accuracy: {location['accuracy']})\n"
-            )
+            if args.debug:
+                print(
+                    f"Location: {location['latitude']} {location['longitude']} (accuracy: {location['accuracy']})\n"
+                )
 
         if args.all or args.pumps:
-            print("== Pumps ==")
-            for pump in await spa.get_pumps():
-                print(pump)
-            print()
+            if args.debug:
+                print("== Pumps ==")
+                for pump in await spa.get_pumps():
+                    print(pump)
+                    print(type(pump))
+                print()
+
+            data2push = {}
+#            data2push['status_water_temperature'] = status_dict['water']['temperature']
+#            push_data(measurement, data2push, {})
 
         if args.all or args.lights:
-            print("== Lights ==")
-            for light in await spa.get_lights():
-                print(light)
-            print()
+            if args.debug:
+                print("== Lights ==")
+                for light in await spa.get_lights():
+                    print(light)
+                print()
 
         if args.all or args.errors:
-            print("== Errors ==")
-            for error in await spa.get_errors():
-                print(error)
-            print()
+            if args.debug:
+                print("== Errors ==")
+                for error in await spa.get_errors():
+                    print(error)
+                print()
 
         if args.all or args.reminders:
-            print("== Reminders ==")
-            for reminder in await spa.get_reminders():
-                print(reminder)
-            print()
+            if args.debug:
+                print("== Reminders ==")
+                for reminder in await spa.get_reminders():
+                    print(reminder)
+                print()
 
         if args.all or args.locks:
-            print("== Locks ==")
-            for lock in status.locks.values():
-                print(lock)
-            print()
+            if args.debug:
+                print("== Locks ==")
+                for lock in status.locks.values():
+                    print(lock)
+                print()
 
         if args.all or args.energy:
-            print("== Energy usage ==")
             energy_usage_day = spa.get_energy_usage(
                 spa.EnergyUsageInterval.DAY,
                 end_date=datetime.date.today(),
                 start_date=datetime.date.today() - datetime.timedelta(days=7),
             )
-            pp.pprint(await energy_usage_day)
-            print()
+            await energy_usage_day
+            if args.debug:
+                print("== Energy usage ==")
+                pp.pprint(await energy_usage_day)
+                print()
 
         if args.all or args.debug:
             debug_status = await spa.get_debug_status()
-            print("== Debug status ==")
-            pp.pprint(debug_status)
-            print()
+            if args.debug:
+                print("== Debug status ==")
+                pp.pprint(debug_status)
+                print()
 
 
 async def set_command(spas, args):
@@ -203,7 +233,7 @@ async def main(argv):
     info_parser.add_argument("--errors", action="store_true")
     info_parser.add_argument("--reminders", action="store_true")
     info_parser.add_argument("--locks", action="store_true")
-    info_parser.add_argument("--debug", action="store_true")
+    info_parser.add_argument("--debug", default=False, action="store_true")
     info_parser.add_argument("--energy", action="store_true")
 
     set_parser = subparsers.add_parser("set", help="Change settings on the spa")
@@ -245,10 +275,11 @@ async def main(argv):
         account = await st.get_account()
 
         spas = await account.get_spas()
-        pp.pprint(args)
+#        pp.pprint(args)
         args.func = info_command
         args.all = True
         args.location = True
+        args.debug = False
         await args.func(spas, args)
 
 
