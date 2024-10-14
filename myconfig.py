@@ -7,8 +7,7 @@ import argparse
 import pprint
 
 verbose = 0
-#directory_base = "/usr/local/span_panel/"
-directory_base = "/Users/willey/PycharmProjects/smarttub2influx/"
+directory_base = "/usr/local/smarttub2influx/"
 pp = pprint.PrettyPrinter(indent=4)
 
 
