@@ -20,7 +20,8 @@ pp = pprint.PrettyPrinter(indent=4)
 
 session = requests.Session()
 verbose = 0
-directory_base = "/usr/local/span_panel/"
+#directory_base = "/usr/local/span_panel/"
+directory_base = "/Users/willey/PycharmProjects/smarttub2influx"
 
 with open(myconfig.config["logging"]["log_config"], "rt") as f:
     lconfig = yaml.load(f.read(), Loader=yaml.SafeLoader)
