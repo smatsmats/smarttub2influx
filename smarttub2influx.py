@@ -32,7 +32,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 session = requests.Session()
 verbose = 0
-directory_base = "/usr/local/smarttub2influx/"
+directory_base = "."
 
 relay_state_map = {"CLOSED": 1.0, "OPEN": 0.0}
 calls = 0
@@ -93,15 +93,16 @@ async def info_command(spas, args):
 
         if args.all or args.pumps:
             if args.debug:
-                print("== Pumps ==")
-                for pump in await spa.get_pumps():
+              print("== Pumps ==")
+            data2push = {}
+            for pump in await spa.get_pumps():
+                if args.debug:
                     print(pump)
-                    print(type(pump))
+                data2push['pump_' + pump.type.name + '-' + pump.id] = pump.state.name
+            if args.debug:
                 print()
 
-            data2push = {}
-#            data2push['status_water_temperature'] = status_dict['water']['temperature']
-#            push_data(measurement, data2push, {})
+            push_data(measurement, data2push, {})
 
         if args.all or args.lights:
             if args.debug:
