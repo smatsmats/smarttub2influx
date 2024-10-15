@@ -126,16 +126,21 @@ async def info_command(spas, args):
                 Exterior = 2
                 Status = 3
 
-            for light in await spa.get_lights():
-                if args.debug:
-                    print(light)
-                data2push['lights_' + Light_zone(light.zone).name + '_mode'] = light.mode.name
-                data2push['lights_' + Light_zone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
-                data2push['lights_' + Light_zone(light.zone).name + '_intensity'] = light.intensity
+
+            try:
+                for light in await spa.get_lights():
+                    if args.debug:
+                        print(light)
+                    data2push['lights_' + Light_zone(light.zone).name + '_mode'] = light.mode.name
+                    data2push['lights_' + Light_zone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
+                    data2push['lights_' + Light_zone(light.zone).name + '_intensity'] = light.intensity
+                push_data(measurement, data2push, {})
+            except KeyError as e:
+                print(f'key error trying to find {e}')
+
             if args.debug:
                 print()
 
-            push_data(measurement, data2push, {})
 
 
 ########### ERRORS
