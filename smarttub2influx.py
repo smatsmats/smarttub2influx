@@ -139,7 +139,8 @@ async def info_command(spas, args):
             # leaving this outside of debug to let us know if we get any errors
             for error in await spa.get_errors():
                 print(error)
-            print()
+            if args.debug:
+                print()
 
         if args.all or args.reminders:
 #<SpaReminder WATER: INACTIVE/58/False>
