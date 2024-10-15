@@ -20,7 +20,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 session = requests.Session()
 verbose = 0
-directory_base = "/usr/local/smarttub2influx/"
+directory_base = "."
 
 with open(myconfig.config["logging"]["log_config"], "rt") as f:
     lconfig = yaml.load(f.read(), Loader=yaml.SafeLoader)

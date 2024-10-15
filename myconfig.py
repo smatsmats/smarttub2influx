@@ -7,7 +7,7 @@ import argparse
 import pprint
 
 verbose = 0
-directory_base = "/usr/local/smarttub2influx/"
+directory_base = "."
 pp = pprint.PrettyPrinter(indent=4)
 
 
