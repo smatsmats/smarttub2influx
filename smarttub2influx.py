@@ -135,23 +135,49 @@ async def info_command(spas, args):
         if args.all or args.errors:
             if args.debug:
                 print("== Errors ==")
-                for error in await spa.get_errors():
-                    print(error)
-                print()
+
+            # leaving this outside of debug to let us know if we get any errors
+            for error in await spa.get_errors():
+                print(error)
+            print()
 
         if args.all or args.reminders:
+#<SpaReminder WATER: INACTIVE/58/False>
+#<SpaReminder AIR_FILTER: INACTIVE/58/False>
+#<SpaReminder FILTER01: INACTIVE/58/False>
+#<SpaReminder {self.id}: {self.state}/{self.remaining_days}/{self.snoozed}>
+
+            data2push = {}
             if args.debug:
                 print("== Reminders ==")
-                for reminder in await spa.get_reminders():
+            for reminder in await spa.get_reminders():
+                if args.debug:
                     print(reminder)
+                data2push['reminders_' + reminder.name + '_state'] = reminder.state
+                data2push['reminders_' + reminder.name + '_remaining_days'] = reminder.remaining_days
+                data2push['reminders_' + reminder.name + '_snoozed'] = reminder.snoozed
+            if args.debug:
                 print()
 
+            push_data(measurement, data2push, {})
+
         if args.all or args.locks:
+#<SpaLock temperature: UNLOCKED>
+#<SpaLock spa: UNLOCKED>
+#<SpaLock access: UNLOCKED>
+#<SpaLock maintenance: UNLOCKED>
+#<SpaLock {self.kind}: {self.state}>
+            data2push = {}
             if args.debug:
                 print("== Locks ==")
-                for lock in status.locks.values():
+            for lock in status.locks.values():
+                data2push['locks_' + lock.kind + '_state'] = lock.state
+                if args.debug:
                     print(lock)
+            if args.debug:
                 print()
+
+            push_data(measurement, data2push, {})
 
         if args.all or args.energy:
             energy_usage_day = spa.get_energy_usage(
