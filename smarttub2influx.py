@@ -64,6 +64,8 @@ async def info_command(spas, args):
         if args.all or args.status or args.location or args.locks:
             status = await spa.get_status()
 
+########### STATUS
+
         if args.all or args.status:
             status_dict = status.properties.copy()
             # redact location for privacy
@@ -92,6 +94,8 @@ async def info_command(spas, args):
                     f"Location: {location['latitude']} {location['longitude']} (accuracy: {location['accuracy']})\n"
                 )
 
+########### PUMPS
+
         if args.all or args.pumps:
             if args.debug:
               print("== Pumps ==")
@@ -106,6 +110,8 @@ async def info_command(spas, args):
             push_data(measurement, data2push, {})
 
         if args.all or args.lights:
+
+########### LIGHTS
 
             data2push = {}
 #<SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
@@ -132,6 +138,7 @@ async def info_command(spas, args):
             push_data(measurement, data2push, {})
 
 
+########### ERRORS
         if args.all or args.errors:
             if args.debug:
                 print("== Errors ==")
@@ -142,6 +149,7 @@ async def info_command(spas, args):
             if args.debug:
                 print()
 
+########### REMINDERS
         if args.all or args.reminders:
 #<SpaReminder WATER: INACTIVE/58/False>
 #<SpaReminder AIR_FILTER: INACTIVE/58/False>
@@ -162,6 +170,7 @@ async def info_command(spas, args):
 
             push_data(measurement, data2push, {})
 
+########### LOCKS
         if args.all or args.locks:
 #<SpaLock temperature: UNLOCKED>
 #<SpaLock spa: UNLOCKED>
@@ -180,6 +189,7 @@ async def info_command(spas, args):
 
             push_data(measurement, data2push, {})
 
+########### ENERGY
         if args.all or args.energy:
 #[{'key': '2024-10-14', 'value': 0.3512727272727273},
 # {'key': '2024-10-13', 'value': 0.4330909090909091},
@@ -197,6 +207,7 @@ async def info_command(spas, args):
                 pp.pprint(await energy_usage_day)
                 print()
 
+########### DEBUG
         if args.all or args.debug:
 #{   'battery': {'percentCharge': None, 'voltage': None},
 #    'freeMemory': 2685792,
