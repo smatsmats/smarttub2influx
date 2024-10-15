@@ -8,6 +8,7 @@ import pprint
 import sys
 
 import aiohttp
+from enum import Enum
 
 #import smarttub, spalight
 from smarttub import SmartTub
@@ -105,11 +106,31 @@ async def info_command(spas, args):
             push_data(measurement, data2push, {})
 
         if args.all or args.lights:
+
+            data2push = {}
+#<SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
+#<SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
+#<SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
+#"<SpaLight {self.zone}: {self.mode.name} (R {self.red}/G {self.green}/B {self.blue}/W {self.white}) @ {self.intensity}>"
             if args.debug:
                 print("== Lights ==")
-                for light in await spa.get_lights():
+
+            class Light_zone(Enum):
+                Interior = 1
+                Exterior = 2
+                Status = 3
+
+            for light in await spa.get_lights():
+                if args.debug:
                     print(light)
+                data2push['lights_' + Light_zone(light.zone).name + '_mode'] = light.mode.name
+                data2push['lights_' + Light_zone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
+                data2push['lights_' + Light_zone(light.zone).name + '_intensity'] = light.intensity
+            if args.debug:
                 print()
+
+            push_data(measurement, data2push, {})
+
 
         if args.all or args.errors:
             if args.debug:
