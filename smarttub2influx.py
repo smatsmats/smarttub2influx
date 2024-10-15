@@ -181,23 +181,48 @@ async def info_command(spas, args):
             push_data(measurement, data2push, {})
 
         if args.all or args.energy:
-            energy_usage_day = spa.get_energy_usage(
-                spa.EnergyUsageInterval.DAY,
-                end_date=datetime.date.today(),
-                start_date=datetime.date.today() - datetime.timedelta(days=7),
-            )
-            await energy_usage_day
+#[{'key': '2024-10-14', 'value': 0.3512727272727273},
+# {'key': '2024-10-13', 'value': 0.4330909090909091},
+# {'key': '2024-10-08', 'value': 0.5465454545454546}]
+
             if args.debug:
+                energy_usage_day = spa.get_energy_usage(
+                    spa.EnergyUsageInterval.DAY,
+                    end_date=datetime.date.today(),
+                    start_date=datetime.date.today() - datetime.timedelta(days=7),
+                )
+#            energy_usage_day_out = await energy_usage_day
+
                 print("== Energy usage ==")
                 pp.pprint(await energy_usage_day)
                 print()
 
         if args.all or args.debug:
+#{   'battery': {'percentCharge': None, 'voltage': None},
+#    'freeMemory': 2685792,
+#    'lastResetReason': 'RESET_REASON_POWER_DOWN',
+#    'powerStatus': 'DC',
+#    'resetCount': 22,
+#    'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
+
+            data2push = {}
+
             debug_status = await spa.get_debug_status()
+
             if args.debug:
                 print("== Debug status ==")
                 pp.pprint(debug_status)
                 print()
+
+            for thing1 in debug_status:
+                if type(debug_status[thing1]) is dict:
+                    for thing2 in debug_status[thing1]:
+                        data2push['debug_' + thing1 + '_' + thing2] = debug_status[thing1][thing2]
+                else:
+                    data2push['debug_' + thing1] = debug_status[thing1]
+
+            push_data(measurement, data2push, {})
+
 
 
 async def set_command(spas, args):
