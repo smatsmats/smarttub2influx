@@ -25,7 +25,7 @@ verbose = 0
 directory_base = "."
 
 
-def push_data(measurement, data, tags=dict()):
+def push_data(measurement, data, tags=None):
     json_body = [
         {
             "measurement": measurement,
@@ -50,7 +50,7 @@ async def info_command(spas, args):
 
         status = await spa.get_status()
 
-########### STATUS
+# ## ## ## ## ## STATUS
 
         status_dict = status.properties.copy()
 
@@ -59,18 +59,15 @@ async def info_command(spas, args):
             pp.pprint(status_dict)
             print()
 
-        data2push = {}
-        data2push['status_water_temperature'] = status_dict['water']['temperature']
-        data2push['status_ambient_temperature'] = status_dict['ambientTemperature']
-        data2push['status_current_value'] = status_dict['current']['value']
-        data2push['status_current_kwh'] = status_dict['current']['kwh']
-        data2push['status_heater'] = status_dict['heater']
-        data2push['status_ozone'] = status_dict['ozone']
-        data2push['status_set_temperature'] = status_dict['setTemperature']
-        data2push['status_state'] = status_dict['state']
+        data2push = {'status_water_temperature': status_dict['water']['temperature'],
+                     'status_ambient_temperature': status_dict['ambientTemperature'],
+                     'status_current_value': status_dict['current']['value'],
+                     'status_current_kwh': status_dict['current']['kwh'], 'status_heater': status_dict['heater'],
+                     'status_ozone': status_dict['ozone'], 'status_set_temperature': status_dict['setTemperature'],
+                     'status_state': status_dict['state']}
         push_data(measurement, data2push, {})
 
-########### PUMPS
+# ## ## ## ## ## PUMPS
 
         data2push = {}
 
@@ -88,7 +85,7 @@ async def info_command(spas, args):
         push_data(measurement, data2push, {})
 
 
-########### LIGHTS
+# ## ## ## ## ## LIGHTS
 
 # <SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
 # <SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
@@ -97,7 +94,7 @@ async def info_command(spas, args):
 
         data2push = {}
 
-        class Light_zone(Enum):
+        class LightZone(Enum):
             Interior = 1
             Exterior = 2
             Status = 3
@@ -109,9 +106,9 @@ async def info_command(spas, args):
             for light in await spa.get_lights():
                 if args.all or args.lights:
                     print(light)
-                data2push['lights_' + Light_zone(light.zone).name + '_mode'] = light.mode.name
-                data2push['lights_' + Light_zone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
-                data2push['lights_' + Light_zone(light.zone).name + '_intensity'] = light.intensity
+                data2push['lights_' + LightZone(light.zone).name + '_mode'] = light.mode.name
+                data2push['lights_' + LightZone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
+                data2push['lights_' + LightZone(light.zone).name + '_intensity'] = light.intensity
             push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
@@ -119,7 +116,7 @@ async def info_command(spas, args):
         if args.all or args.lights:
             print()
 
-########### ERRORS
+# ## ## ## ## ## ERRORS
 
         if args.all or args.errors:
             print("== Errors ==")
@@ -131,7 +128,7 @@ async def info_command(spas, args):
         if args.all or args.errors:
             print()
 
-########### REMINDERS
+# ## ## ## ## ## REMINDERS
 
 # <SpaReminder WATER: INACTIVE/58/False>
 # <SpaReminder AIR_FILTER: INACTIVE/58/False>
@@ -155,7 +152,7 @@ async def info_command(spas, args):
         if args.all or args.reminders:
             print()
 
-########### LOCKS
+# ## ## ## ## ## LOCKS
 
 # <SpaLock temperature: UNLOCKED>
 # <SpaLock spa: UNLOCKED>
@@ -177,7 +174,7 @@ async def info_command(spas, args):
 
         push_data(measurement, data2push, {})
 
-########### ENERGY
+# ## ## ## ## ## ENERGY
 
 # [{'key': '2024-10-14', 'value': 0.3512727272727273},
 #  {'key': '2024-10-13', 'value': 0.4330909090909091},
@@ -194,7 +191,7 @@ async def info_command(spas, args):
             pp.pprint(await energy_usage_day)
             print()
 
-########### DEBUG
+# ## ## ## ## ## DEBUG
 
 # {   'battery': {'percentCharge': None, 'voltage': None},
 #     'freeMemory': 2685792,
