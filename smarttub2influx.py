@@ -3,26 +3,16 @@
 import argparse
 import asyncio
 import datetime
-import logging
 import pprint
 import sys
 
 import aiohttp
 from enum import Enum
 
-#import smarttub, spalight
 from smarttub import SmartTub
-
-# old remove
-import requests
-import time
-import json
-import math
-from requests.exceptions import HTTPError
 
 import logging
 import logging.config
-import yaml
 
 # local stuff
 import influx
@@ -31,15 +21,11 @@ import mylogger
 
 pp = pprint.PrettyPrinter(indent=4)
 
-session = requests.Session()
 verbose = 0
 directory_base = "."
 
-relay_state_map = {"CLOSED": 1.0, "OPEN": 0.0}
-calls = 0
 
-
-def push_data(measurement, data, tags={}):
+def push_data(measurement, data, tags=dict()):
     json_body = [
         {
             "measurement": measurement,
@@ -104,10 +90,10 @@ async def info_command(spas, args):
 
 ########### LIGHTS
 
-#<SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
-#<SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
-#<SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
-#"<SpaLight {self.zone}: {self.mode.name} (R {self.red}/G {self.green}/B {self.blue}/W {self.white}) @ {self.intensity}>"
+# <SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
+# <SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
+# <SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
+# "<SpaLight {self.zone}: {self.mode.name} (R {self.red}/G {self.green}/B {self.blue}/W {self.white}) @ {self.intensity}>"
 
         data2push = {}
 
@@ -147,10 +133,10 @@ async def info_command(spas, args):
 
 ########### REMINDERS
 
-#<SpaReminder WATER: INACTIVE/58/False>
-#<SpaReminder AIR_FILTER: INACTIVE/58/False>
-#<SpaReminder FILTER01: INACTIVE/58/False>
-#<SpaReminder {self.id}: {self.state}/{self.remaining_days}/{self.snoozed}>
+# <SpaReminder WATER: INACTIVE/58/False>
+# <SpaReminder AIR_FILTER: INACTIVE/58/False>
+# <SpaReminder FILTER01: INACTIVE/58/False>
+# <SpaReminder {self.id}: {self.state}/{self.remaining_days}/{self.snoozed}>
 
         data2push = {}
 
@@ -171,11 +157,11 @@ async def info_command(spas, args):
 
 ########### LOCKS
 
-#<SpaLock temperature: UNLOCKED>
-#<SpaLock spa: UNLOCKED>
-#<SpaLock access: UNLOCKED>
-#<SpaLock maintenance: UNLOCKED>
-#<SpaLock {self.kind}: {self.state}>
+# <SpaLock temperature: UNLOCKED>
+# <SpaLock spa: UNLOCKED>
+# <SpaLock access: UNLOCKED>
+# <SpaLock maintenance: UNLOCKED>
+# <SpaLock {self.kind}: {self.state}>
 
         data2push = {}
 
@@ -193,9 +179,9 @@ async def info_command(spas, args):
 
 ########### ENERGY
 
-#[{'key': '2024-10-14', 'value': 0.3512727272727273},
-# {'key': '2024-10-13', 'value': 0.4330909090909091},
-# {'key': '2024-10-08', 'value': 0.5465454545454546}]
+# [{'key': '2024-10-14', 'value': 0.3512727272727273},
+#  {'key': '2024-10-13', 'value': 0.4330909090909091},
+#  {'key': '2024-10-08', 'value': 0.5465454545454546}]
 
         if args.all or args.energy:
             energy_usage_day = spa.get_energy_usage(
@@ -210,12 +196,12 @@ async def info_command(spas, args):
 
 ########### DEBUG
 
-#{   'battery': {'percentCharge': None, 'voltage': None},
-#    'freeMemory': 2685792,
-#    'lastResetReason': 'RESET_REASON_POWER_DOWN',
-#    'powerStatus': 'DC',
-#    'resetCount': 22,
-#    'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
+# {   'battery': {'percentCharge': None, 'voltage': None},
+#     'freeMemory': 2685792,
+#     'lastResetReason': 'RESET_REASON_POWER_DOWN',
+#     'powerStatus': 'DC',
+#     'resetCount': 22,
+#     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
         data2push = {}
 
@@ -234,55 +220,6 @@ async def info_command(spas, args):
                 data2push['debug_' + thing1] = debug_status[thing1]
 
         push_data(measurement, data2push, {})
-
-
-
-async def set_command(spas, args):
-    for spa in spas:
-        if args.temperature:
-            await spa.set_temperature(args.temperature)
-
-        if args.light_mode:
-            for light in await spa.get_lights():
-                if args.verbosity > 0:
-                    print(light)
-                mode = light.LightMode[args.light_mode]
-                if mode == light.LightMode.OFF:
-                    await light.set_mode(mode, 0)
-                else:
-                    await light.set_mode(mode, 50)
-
-        if args.snooze_reminder:
-            reminder_id, days = args.snooze_reminder
-            days = int(days)
-            reminder = next(
-                reminder
-                for reminder in await spa.get_reminders()
-                if reminder.id == reminder_id
-            )
-            await reminder.snooze(days)
-
-        if args.reset_reminder:
-            reminder_id, days = args.reset_reminder
-            days = int(days)
-            reminder = next(
-                reminder
-                for reminder in await spa.get_reminders()
-                if reminder.id == reminder_id
-            )
-            await reminder.reset(days)
-
-        if args.lock:
-            status = await spa.get_status()
-            lock = status.locks[args.lock.lower()]
-            await lock.lock()
-            print("OK")
-
-        if args.unlock:
-            status = await spa.get_status()
-            lock = status.locks[args.unlock.lower()]
-            await lock.unlock()
-            print("OK")
 
 
 async def main(argv):
