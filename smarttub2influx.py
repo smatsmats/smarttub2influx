@@ -43,12 +43,13 @@ def push_data(measurement, data, tags=None):
 
 async def info_command(spas, args):
     for spa in spas:
+
         measurement = spa.name
 
         if args.debug:
             print(f"= Spa '{spa.name}' =\n")
 
-        status = await spa.get_status()
+        status = await spa.get_status_full()
 
 # ## ## ## ## ## STATUS
 
