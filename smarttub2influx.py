@@ -63,8 +63,10 @@ async def info_command(spas, args):
         data2push = {'status_water_temperature': status_dict['water']['temperature'],
                      'status_ambient_temperature': status_dict['ambientTemperature'],
                      'status_current_value': status_dict['current']['value'],
-                     'status_current_kwh': status_dict['current']['kwh'], 'status_heater': status_dict['heater'],
-                     'status_ozone': status_dict['ozone'], 'status_set_temperature': status_dict['setTemperature'],
+                     'status_current_kwh': status_dict['current']['kwh'],
+                     'status_heater': status_dict['heater'],
+                     'status_ozone': status_dict['ozone'],
+                     'status_set_temperature': status_dict['setTemperature'],
                      'status_state': status_dict['state']}
         push_data(measurement, data2push, {})
 
@@ -78,7 +80,8 @@ async def info_command(spas, args):
         for pump in await spa.get_pumps():
             if args.all or args.pumps:
                 print(pump)
-            data2push['pump_' + pump.type.name + '-' + pump.id] = pump.state.name
+            data2push['pump_' + pump.type.name +
+                      '-' + pump.id] = pump.state.name
 
         if args.all or args.pumps:
             print()
@@ -107,9 +110,12 @@ async def info_command(spas, args):
             for light in await spa.get_lights():
                 if args.all or args.lights:
                     print(light)
-                data2push['lights_' + LightZone(light.zone).name + '_mode'] = light.mode.name
-                data2push['lights_' + LightZone(light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
-                data2push['lights_' + LightZone(light.zone).name + '_intensity'] = light.intensity
+                data2push['lights_' +
+                          LightZone(light.zone).name + '_mode'] = light.mode.name
+                data2push['lights_' + LightZone(
+                    light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
+                data2push['lights_' +
+                          LightZone(light.zone).name + '_intensity'] = light.intensity
             push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
@@ -145,8 +151,10 @@ async def info_command(spas, args):
             if args.all or args.reminders:
                 print(reminder)
             data2push['reminders_' + reminder.name + '_state'] = reminder.state
-            data2push['reminders_' + reminder.name + '_remaining_days'] = reminder.remaining_days
-            data2push['reminders_' + reminder.name + '_snoozed'] = reminder.snoozed
+            data2push['reminders_' + reminder.name +
+                      '_remaining_days'] = reminder.remaining_days
+            data2push['reminders_' + reminder.name +
+                      '_snoozed'] = reminder.snoozed
 
         push_data(measurement, data2push, {})
 
@@ -213,7 +221,8 @@ async def info_command(spas, args):
         for thing1 in debug_status:
             if type(debug_status[thing1]) is dict:
                 for thing2 in debug_status[thing1]:
-                    data2push['debug_' + thing1 + '_' + thing2] = debug_status[thing1][thing2]
+                    data2push['debug_' + thing1 + '_' +
+                              thing2] = debug_status[thing1][thing2]
             else:
                 data2push['debug_' + thing1] = debug_status[thing1]
 
