@@ -9,6 +9,8 @@ import sys
 import aiohttp
 from enum import Enum
 
+import sys
+sys.path.insert(0,'/home/willey/python-smarttub')
 from smarttub import SmartTub
 
 import logging
