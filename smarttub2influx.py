@@ -93,6 +93,27 @@ async def info_command(spas, args):
 
 # ## ## ## ## ## LIGHTS
 
+#   'lights': [   {   'color': {'blue': 0, 'green': 0, 'red': 0, 'white': 0},
+#                      'cycleSpeed': 3,
+#                      'exterior': False,
+#                      'intensity': 60,
+#                      'irt': None,
+#                      'mode': 'COLOR_WHEEL',
+#                      'zone': 1},
+#                  {   'color': {'blue': 0, 'green': 0, 'red': 0, 'white': 0},
+#                      'cycleSpeed': 0,
+#                      'exterior': True,
+#                      'intensity': 0,
+#                      'irt': None,
+#                      'mode': 'OFF',
+#                      'zone': 2},
+#                  {   'color': {'blue': 0, 'green': 0, 'red': 0, 'white': 0},
+#                      'cycleSpeed': 0,
+#                      'exterior': False,
+#                      'intensity': 100,
+#                      'irt': None,
+#                      'mode': 'OFF',
+#                      'zone': 3}],
 # <SpaLight 1: OFF (R 0/G 0/B 0/W 0) @ 0>    interior
 # <SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
 # <SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
@@ -112,12 +133,11 @@ async def info_command(spas, args):
             for light in await spa.get_lights():
                 if args.all or args.lights:
                     print(light)
-                data2push['lights_' +
-                          LightZone(light.zone).name + '_mode'] = light.mode.name
-                data2push['lights_' + LightZone(
-                    light.zone).name + '_color'] = light.red + light.green + light.blue + light.white
-                data2push['lights_' +
-                          LightZone(light.zone).name + '_intensity'] = light.intensity
+                data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                             'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                             'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
+                             'lights_' + LightZone(light.zone).name + '_intensity': light.intensity}
+#                             'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
             push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
@@ -211,6 +231,9 @@ async def info_command(spas, args):
 #     'resetCount': 22,
 #     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
+        if args.nodebug:
+            return()
+
         data2push = {}
 
         debug_status = await spa.get_debug_status()
@@ -255,6 +278,7 @@ async def main(argv):
     parser.add_argument("--reminders", action="store_true")
     parser.add_argument("--locks", action="store_true")
     parser.add_argument("--debug", default=False, action="store_true")
+    parser.add_argument("--nodebug", default=False, action="store_true")
     parser.add_argument("--energy", action="store_true")
 
     args = parser.parse_args(argv)
