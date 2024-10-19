@@ -236,7 +236,11 @@ async def info_command(spas, args):
 
         data2push = {}
 
-        debug_status = await spa.get_debug_status()
+        try:
+            debug_status = await spa.get_debug_status()
+        except Exception as e:
+            logging.error(e)
+            return()
 
         if args.all or args.debug:
             print("== Debug status ==")
