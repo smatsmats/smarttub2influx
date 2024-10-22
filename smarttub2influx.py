@@ -34,7 +34,7 @@ def push_data(measurement, data, tags=None):
             "tags": tags,
             # we really should use the time from the call, but whatever
             # "time": datetime.utcfromtimestamp(int(data['ts'])).isoformat(),
-            "time": datetime.datetime.utcnow().isoformat(),
+            "time": datetime.datetime.now(datetime.UTC).isoformat(),
             "fields": data,
         }
     ]
