@@ -1,45 +1,18 @@
 ---
 verbose: False
 
-span:
-  host: '<my panel address>'
-  api_user: 'api_user'
-  api_user_desc: 'api_user is a name'
-  auth:
-    token: 'xxx'
-  extra_tab_pairs:
-    - [30, 32]
+smarttub:
+  username: 'smarttub_username'
+  password: 'smarttub_password'
 
 influxdb:
-  username: 'usernamehere'
-  password: 'usernamepassword'
+  username: 'influx_usernamehere'
+  password: 'influx_usernamepassword'
   host: 'localhost'
   port: '8086'
   retention_policy: 'autogen'
   db_name: 'db_namehere'
 
 logging:
-  logger_name: "myspan2influxtoool"
-  log_config: "/usr/local/span2influxdb/config/logging.yml"
-
-graphable:
-  measurement: "graphable"
-  map:
-    temp_in:
-      current:
-        measurement: '289367'
-        data_structure_type: 'non-ISS Current Conditions Record'
-        field: 'temp_in'
-      historic:
-        measurement: '289367'
-        data_structure_type: 'non-ISS Archive Record'
-        field: 'temp_in_last'
-    hum_in:
-      current:
-        measurement: '289367'
-        data_structure_type: 'non-ISS Current Conditions Record'
-        field: 'hum_in'
-      historic:
-        measurement: '289367'
-        data_structure_type: 'non-ISS Archive Record'
-        field: 'hum_in_last'
+  logger_name: "smarttub2influx"
+  log_config: "/usr/local/smarttub2influx/config/logging.yml"
