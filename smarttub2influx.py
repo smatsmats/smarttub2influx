@@ -119,8 +119,6 @@ async def info_command(spas, args):
 # <SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
 # "<SpaLight {self.zone}: {self.mode.name} (R {self.red}/G {self.green}/B {self.blue}/W {self.white}) @ {self.intensity}>"
 
-        data2push = {}
-
         class LightZone(Enum):
             Interior = 1
             Exterior = 2
@@ -131,6 +129,7 @@ async def info_command(spas, args):
 
         try:
             for light in await spa.get_lights():
+                data2push = {}
                 if args.all or args.lights:
                     print(light)
                 data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
@@ -138,7 +137,7 @@ async def info_command(spas, args):
                              'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
                              'lights_' + LightZone(light.zone).name + '_intensity': light.intensity}
 #                             'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
-            push_data(measurement, data2push, {})
+                push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
 
