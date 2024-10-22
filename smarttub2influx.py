@@ -4,14 +4,11 @@ import argparse
 import asyncio
 import datetime
 import pprint
-import sys
-
 import aiohttp
 from enum import Enum
+import sys
 
 import sys
-sys.path.insert(0,'/home/willey/python-smarttub')
-from smarttub import SmartTub
 
 import logging
 import logging.config
@@ -20,6 +17,9 @@ import logging.config
 import influx
 import myconfig
 import mylogger
+
+sys.path.insert(0, '/home/willey/python-smarttub')
+from smarttub import SmartTub
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -129,7 +129,6 @@ async def info_command(spas, args):
 
         try:
             for light in await spa.get_lights():
-                data2push = {}
                 if args.all or args.lights:
                     print(light)
                 data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
@@ -231,7 +230,7 @@ async def info_command(spas, args):
 #     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
         if args.nodebug:
-            return()
+            return ()
 
         data2push = {}
 
@@ -239,7 +238,7 @@ async def info_command(spas, args):
             debug_status = await spa.get_debug_status()
         except Exception as e:
             logging.error(e)
-            return()
+            return ()
 
         if args.all or args.debug:
             print("== Debug status ==")
