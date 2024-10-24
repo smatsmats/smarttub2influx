@@ -237,7 +237,7 @@ async def info_command(spas, args):
         try:
             debug_status = await spa.get_debug_status()
         except Exception as e:
-            logging.warning(e)
+            logging.info(e)
             return ()
 
         if args.all or args.debug:
