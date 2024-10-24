@@ -55,6 +55,15 @@ async def info_command(spas, args):
 
 # ## ## ## ## ## STATUS
 
+#  'lastWifi': {   'lastConnectionTimestamp': '2024-10-24T17:22:20.239499Z',
+#                    'ssid': 'seacrest6'},
+# 'signal': {   'country': 'US',
+#               'networkName': 'AT&T Wireless Inc.',
+#               'quality': 0,
+#               'signalAt': None,
+#               'strength': 20,
+#               'updateAt': '2024-10-24T19:02:29.283Z'},
+
         status_dict = status.properties.copy()
 
         if args.all or args.status:
@@ -69,7 +78,14 @@ async def info_command(spas, args):
                      'status_heater': status_dict['heater'],
                      'status_ozone': status_dict['ozone'],
                      'status_set_temperature': status_dict['setTemperature'],
-                     'status_state': status_dict['state']}
+                     'status_state': status_dict['state'],
+                     'status_watercare': status_dict['watercare'],
+                     'status_signal_quality': status_dict['signal']['quality'],
+                     'status_signal_strength': status_dict['signal']['strength'],
+                     'status_signal_signalAt': status_dict['signal']['signalAt'],
+                     'status_signal_updateAt': status_dict['signal']['updateAt'],
+                     'status_lastWifi_ssid': status_dict['lastWifi']['ssid'],
+                     'status_lastWifi_lastConnectionTimestamp': status_dict['lastWifi']['lastConnectionTimestamp']}
         push_data(measurement, data2push, {})
 
 # ## ## ## ## ## PUMPS
