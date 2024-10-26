@@ -147,11 +147,16 @@ async def info_command(spas, args):
             for light in await spa.get_lights():
                 if args.all or args.lights:
                     print(light)
+                if light.mode.name == 'COLOR_WHEEL':
+                    light_mode = light.mode.name + "_" + str(light.cycleSpeed)
+                else:
+                    light_mode = light.mode.name
                 data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
-                             'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                             'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
+                             'lights_' + LightZone(light.zone).name + '_mode': light_mode,
                              'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
-                             'lights_' + LightZone(light.zone).name + '_intensity': light.intensity}
-#                             'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
+                             'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
+                             'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
                 push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
