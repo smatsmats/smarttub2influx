@@ -1,16 +1,9 @@
 #!/usr/bin/python3
 
-import requests
 import pprint
-import time
-import json
-import math
-import sys
-from requests.exceptions import HTTPError
 
 import logging
 import logging.config
-import argparse
 import yaml
 
 # local stuff
@@ -18,7 +11,6 @@ import myconfig
 
 pp = pprint.PrettyPrinter(indent=4)
 
-session = requests.Session()
 verbose = 0
 directory_base = "."
 
