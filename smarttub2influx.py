@@ -85,7 +85,8 @@ async def info_command(spas, args):
                      'status_signal_updateAt': status_dict['signal']['updateAt'],
                      'status_lastWifi_ssid': status_dict['lastWifi']['ssid'],
                      'status_lastWifi_lastConnectionTimestamp': status_dict['lastWifi']['lastConnectionTimestamp']}
-        push_data(measurement, data2push, {})
+        if args.push2influx:
+            push_data(measurement, data2push, {})
 
 # ## ## ## ## ## PUMPS
 
@@ -103,7 +104,8 @@ async def info_command(spas, args):
         if args.all or args.pumps:
             print()
 
-        push_data(measurement, data2push, {})
+        if args.push2influx:
+            push_data(measurement, data2push, {})
 
 
 # ## ## ## ## ## LIGHTS
@@ -156,7 +158,8 @@ async def info_command(spas, args):
                              'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
                              'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
                              'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
-                push_data(measurement, data2push, {})
+                if args.push2influx:
+                    push_data(measurement, data2push, {})
         except KeyError as e:
             print(f'key error trying to find {e}')
 
@@ -196,7 +199,8 @@ async def info_command(spas, args):
             data2push['reminders_' + reminder.name +
                       '_snoozed'] = reminder.snoozed
 
-        push_data(measurement, data2push, {})
+        if args.push2influx:
+            push_data(measurement, data2push, {})
 
         if args.all or args.reminders:
             print()
@@ -221,7 +225,8 @@ async def info_command(spas, args):
         if args.all or args.locks:
             print()
 
-        push_data(measurement, data2push, {})
+        if args.push2influx:
+            push_data(measurement, data2push, {})
 
 # ## ## ## ## ## ENERGY
 
@@ -273,7 +278,8 @@ async def info_command(spas, args):
             else:
                 data2push['debug_' + thing1] = debug_status[thing1]
 
-        push_data(measurement, data2push, {})
+        if args.push2influx:
+            push_data(measurement, data2push, {})
 
 
 async def set_command(spas, args):
@@ -327,9 +333,6 @@ async def set_command(spas, args):
 async def main(argv):
     global ic
 
-    # create influx client
-    ic = influx.InfluxClient()
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbosity", action="count", default=0)
     parser.set_defaults(func=info_command)
@@ -350,6 +353,7 @@ async def main(argv):
     parser.add_argument("--debug", default=False, action="store_true")
     parser.add_argument("--nodebug", default=False, action="store_true")
     parser.add_argument("--energy", action="store_true")
+    parser.add_argument("--push2influx", default=False, action="store_true")
 
     args = parser.parse_args(argv)
 
@@ -359,6 +363,10 @@ async def main(argv):
         log_level = logging.INFO
 
     logging.basicConfig(level=log_level)
+
+    # create influx client, maybe
+    if args.push2influx:
+        ic = influx.InfluxClient()
 
     async with aiohttp.ClientSession() as session:
         st = SmartTub(session)
