@@ -362,7 +362,11 @@ async def main(argv):
 
     async with aiohttp.ClientSession() as session:
         st = SmartTub(session)
-        await st.login(myconfig.config["smarttub"]["username"], myconfig.config["smarttub"]["password"])
+        try:
+            await st.login(myconfig.config["smarttub"]["username"], myconfig.config["smarttub"]["password"])
+        except Exception as e:
+            logging.error(e)
+            sys.exit(1)
 
         account = await st.get_account()
 
