@@ -6,7 +6,6 @@ import datetime
 import pprint
 import aiohttp
 from enum import Enum
-import sys
 
 import sys
 
