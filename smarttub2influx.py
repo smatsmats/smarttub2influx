@@ -18,7 +18,7 @@ import myconfig
 import mylogger
 
 sys.path.insert(0, '/home/willey/python-smarttub')
-from smarttub import SmartTub
+from smarttub import SmartTub, SpaLight
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -254,7 +254,7 @@ async def info_command(spas, args):
 #     'resetCount': 22,
 #     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
-        if args.nodebug:
+        if args.skipdebug:
             return ()
 
         data2push = {}
@@ -335,25 +335,63 @@ async def main(argv):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbosity", action="count", default=0)
+    parser.add_argument("--skipdebug", default=False, action="store_true")
+    parser.add_argument("--debug", default=False, action="store_true")
     parser.set_defaults(func=info_command)
-    parser.add_argument(
+    # this is dumb, fix it TODO
+    parser.set_defaults(all=False)
+    parser.set_defaults(status=False)
+    parser.set_defaults(lights=False)
+    parser.set_defaults(pumps=False)
+    parser.set_defaults(errors=False)
+    parser.set_defaults(reminders=False)
+    parser.set_defaults(energy=False)
+    parser.set_defaults(locks=False)
+
+    parser.set_defaults(push2influx=False)
+    parser.set_defaults(info=False)
+
+    subparsers = parser.add_subparsers()
+    push_parser = subparsers.add_parser("push2influx", help="Populate Influx")
+    push_parser.set_defaults(push2influx=True)
+
+    info_parser = subparsers.add_parser("info", help="Show information about the spa")
+    info_parser.set_defaults(info=True)
+    info_parser.add_argument(
         "-a", "--all", action="store_true", default=False,
         help="Show all info except location"
     )
-    parser.add_argument("--spas", action="store_true")
-    parser.add_argument("--status", action="store_true")
-    parser.add_argument(
-        "--location", action="store_true", help="Show GPS location"
+    info_parser.add_argument("--spas", action="store_true")
+    info_parser.add_argument("--status", action="store_true")
+    info_parser.add_argument("--pumps", action="store_true")
+    info_parser.add_argument("--lights", action="store_true")
+    info_parser.add_argument("--errors", action="store_true")
+    info_parser.add_argument("--reminders", action="store_true")
+    info_parser.add_argument("--locks", action="store_true")
+    info_parser.add_argument("--energy", action="store_true")
+
+    set_parser = subparsers.add_parser("set", help="Change settings on the spa")
+    set_parser.set_defaults(func=set_command)
+    set_parser.add_argument(
+        "-l", "--light_mode", choices=[mode.name for mode in SpaLight.LightMode]
     )
-    parser.add_argument("--pumps", action="store_true")
-    parser.add_argument("--lights", action="store_true")
-    parser.add_argument("--errors", action="store_true")
-    parser.add_argument("--reminders", action="store_true")
-    parser.add_argument("--locks", action="store_true")
-    parser.add_argument("--debug", default=False, action="store_true")
-    parser.add_argument("--nodebug", default=False, action="store_true")
-    parser.add_argument("--energy", action="store_true")
-    parser.add_argument("--push2influx", default=False, action="store_true")
+    set_parser.add_argument("-t", "--temperature", type=float)
+    # TODO: should enforce types of str, int
+    set_parser.add_argument(
+        "--snooze-reminder",
+        nargs=2,
+        help="Snooze a reminder",
+        metavar=("REMINDER_ID", "DAYS"),
+    )
+    # TODO: should enforce types of str, int
+    set_parser.add_argument(
+        "--reset-reminder",
+        nargs=2,
+        help="Reset a reminder",
+        metavar=("REMINDER_ID", "DAYS"),
+    )
+    set_parser.add_argument("--lock", type=str)
+    set_parser.add_argument("--unlock", type=str)
 
     args = parser.parse_args(argv)
 
@@ -380,6 +418,7 @@ async def main(argv):
 
         spas = await account.get_spas()
 
+        pp.pprint(args)
         await args.func(spas, args)
 
 
