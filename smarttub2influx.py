@@ -50,8 +50,6 @@ async def info_command(spas, args):
         if args.debug:
             print(f"= Spa '{spa.name}' =\n")
 
-        status = await spa.get_status_full()
-
 # ## ## ## ## ## STATUS
 
 #  'lastWifi': {   'lastConnectionTimestamp': '2024-10-24T17:22:20.239499Z',
@@ -62,50 +60,53 @@ async def info_command(spas, args):
 #               'signalAt': None,
 #               'strength': 20,
 #               'updateAt': '2024-10-24T19:02:29.283Z'},
+        if args.status or args.all or args.push2influx:
 
-        status_dict = status.properties.copy()
+            status = await spa.get_status_full()
 
-        if args.all or args.status:
-            print("== Status ==")
-            pp.pprint(status_dict)
-            print()
+            status_dict = status.properties.copy()
 
-        data2push = {'status_water_temperature': status_dict['water']['temperature'],
-                     'status_ambient_temperature': status_dict['ambientTemperature'],
-                     'status_current_value': status_dict['current']['value'],
-                     'status_current_kwh': status_dict['current']['kwh'],
-                     'status_heater': status_dict['heater'],
-                     'status_ozone': status_dict['ozone'],
-                     'status_set_temperature': status_dict['setTemperature'],
-                     'status_state': status_dict['state'],
-                     'status_watercare': status_dict['watercare'],
-                     'status_signal_quality': status_dict['signal']['quality'],
-                     'status_signal_strength': status_dict['signal']['strength'],
-                     'status_signal_signalAt': status_dict['signal']['signalAt'],
-                     'status_signal_updateAt': status_dict['signal']['updateAt'],
-                     'status_lastWifi_ssid': status_dict['lastWifi']['ssid'],
-                     'status_lastWifi_lastConnectionTimestamp': status_dict['lastWifi']['lastConnectionTimestamp']}
-        if args.push2influx:
-            push_data(measurement, data2push, {})
+            if args.status or args.all:
+                print("== Status ==")
+                pp.pprint(status_dict)
+                print()
+
+            data2push = {'status_water_temperature': status_dict['water']['temperature'],
+                         'status_ambient_temperature': status_dict['ambientTemperature'],
+                         'status_current_value': status_dict['current']['value'],
+                         'status_current_kwh': status_dict['current']['kwh'],
+                         'status_heater': status_dict['heater'],
+                         'status_ozone': status_dict['ozone'],
+                         'status_set_temperature': status_dict['setTemperature'],
+                         'status_state': status_dict['state'],
+                         'status_watercare': status_dict['watercare'],
+                         'status_signal_quality': status_dict['signal']['quality'],
+                         'status_signal_strength': status_dict['signal']['strength'],
+                         'status_signal_signalAt': status_dict['signal']['signalAt'],
+                         'status_signal_updateAt': status_dict['signal']['updateAt'],
+                         'status_lastWifi_ssid': status_dict['lastWifi']['ssid'],
+                         'status_lastWifi_lastConnectionTimestamp': status_dict['lastWifi']['lastConnectionTimestamp']}
+            if args.push2influx:
+                push_data(measurement, data2push, {})
 
 # ## ## ## ## ## PUMPS
+        if args.all or args.pumps or args.push2influx:
+            data2push = {}
 
-        data2push = {}
-
-        if args.all or args.pumps:
-            print("== Pumps ==")
-
-        for pump in await spa.get_pumps():
             if args.all or args.pumps:
-                print(pump)
-            data2push['pump_' + pump.type.name +
-                      '-' + pump.id] = pump.state.name
+                print("== Pumps ==")
 
-        if args.all or args.pumps:
-            print()
+            for pump in await spa.get_pumps():
+                if args.all or args.pumps:
+                    print(pump)
+                data2push['pump_' + pump.type.name +
+                          '-' + pump.id] = pump.state.name
 
-        if args.push2influx:
-            push_data(measurement, data2push, {})
+            if args.all or args.pumps:
+                print()
+
+            if args.push2influx:
+                push_data(measurement, data2push, {})
 
 
 # ## ## ## ## ## LIGHTS
@@ -135,48 +136,50 @@ async def info_command(spas, args):
 # <SpaLight 2: OFF (R 0/G 0/B 0/W 0) @ 0>    exterior
 # <SpaLight 3: OFF (R 0/G 0/B 0/W 0) @ 100>  status
 # "<SpaLight {self.zone}: {self.mode.name} (R {self.red}/G {self.green}/B {self.blue}/W {self.white}) @ {self.intensity}>"
+        if args.all or args.lights or args.push2influx:
 
-        class LightZone(Enum):
-            Interior = 1
-            Exterior = 2
-            Status = 3
+            class LightZone(Enum):
+                Interior = 1
+                Exterior = 2
+                Status = 3
 
-        if args.all or args.lights:
-            print("== Lights ==")
+            if args.all or args.lights:
+                print("== Lights ==")
 
-        try:
-            for light in await spa.get_lights():
-                if args.all or args.lights:
-                    print(light)
-                if light.mode.name == 'COLOR_WHEEL':
-                    light_mode = light.mode.name + "_" + str(light.cycleSpeed)
-                else:
-                    light_mode = light.mode.name
-                data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
-                             'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
-                             'lights_' + LightZone(light.zone).name + '_mode': light_mode,
-                             'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
-                             'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
-                             'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
-                if args.push2influx:
-                    push_data(measurement, data2push, {})
-        except KeyError as e:
-            print(f'key error trying to find {e}')
+            try:
+                for light in await spa.get_lights():
+                    if args.all or args.lights:
+                        print(light)
+                    if light.mode.name == 'COLOR_WHEEL':
+                        light_mode = light.mode.name + "_" + str(light.cycleSpeed)
+                    else:
+                        light_mode = light.mode.name
+                    data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                                 'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
+                                 'lights_' + LightZone(light.zone).name + '_mode': light_mode,
+                                 'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
+                                 'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
+                                 'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
+                    if args.push2influx:
+                        push_data(measurement, data2push, {})
+            except KeyError as e:
+                print(f'key error trying to find {e}')
 
-        if args.all or args.lights:
-            print()
+            if args.all or args.lights:
+                print()
 
 # ## ## ## ## ## ERRORS
+        if args.all or args.errors or args.push2influx:
 
-        if args.all or args.errors:
-            print("== Errors ==")
+            if args.all or args.errors:
+                print("== Errors ==")
 
-        # leaving this outside of debug to let us know if we get any errors
-        for error in await spa.get_errors():
-            print(error)
+            # leaving this outside of debug to let us know if we get any errors
+            for error in await spa.get_errors():
+                print(error)
 
-        if args.all or args.errors:
-            print()
+            if args.all or args.errors:
+                print()
 
 # ## ## ## ## ## REMINDERS
 
@@ -184,26 +187,27 @@ async def info_command(spas, args):
 # <SpaReminder AIR_FILTER: INACTIVE/58/False>
 # <SpaReminder FILTER01: INACTIVE/58/False>
 # <SpaReminder {self.id}: {self.state}/{self.remaining_days}/{self.snoozed}>
+        if args.all or args.reminders or args.push2influx:
 
-        data2push = {}
+            data2push = {}
 
-        if args.all or args.reminders:
-            print("== Reminders ==")
-
-        for reminder in await spa.get_reminders():
             if args.all or args.reminders:
-                print(reminder)
-            data2push['reminders_' + reminder.name + '_state'] = reminder.state
-            data2push['reminders_' + reminder.name +
-                      '_remaining_days'] = reminder.remaining_days
-            data2push['reminders_' + reminder.name +
-                      '_snoozed'] = reminder.snoozed
+                print("== Reminders ==")
 
-        if args.push2influx:
-            push_data(measurement, data2push, {})
+            for reminder in await spa.get_reminders():
+                if args.all or args.reminders:
+                    print(reminder)
+                data2push['reminders_' + reminder.name + '_state'] = reminder.state
+                data2push['reminders_' + reminder.name +
+                          '_remaining_days'] = reminder.remaining_days
+                data2push['reminders_' + reminder.name +
+                          '_snoozed'] = reminder.snoozed
 
-        if args.all or args.reminders:
-            print()
+            if args.push2influx:
+                push_data(measurement, data2push, {})
+
+            if args.all or args.reminders:
+                print()
 
 # ## ## ## ## ## LOCKS
 
@@ -213,20 +217,22 @@ async def info_command(spas, args):
 # <SpaLock maintenance: UNLOCKED>
 # <SpaLock {self.kind}: {self.state}>
 
-        data2push = {}
+        if args.all or args.locks or args.push2influx:
 
-        if args.all or args.locks:
-            print("== Locks ==")
-        for lock in status.locks.values():
-            data2push['locks_' + lock.kind + '_state'] = lock.state
+            data2push = {}
+
             if args.all or args.locks:
-                print(lock)
+                print("== Locks ==")
+            for lock in status.locks.values():
+                data2push['locks_' + lock.kind + '_state'] = lock.state
+                if args.all or args.locks:
+                    print(lock)
 
-        if args.all or args.locks:
-            print()
+            if args.all or args.locks:
+                print()
 
-        if args.push2influx:
-            push_data(measurement, data2push, {})
+            if args.push2influx:
+                push_data(measurement, data2push, {})
 
 # ## ## ## ## ## ENERGY
 
@@ -234,16 +240,18 @@ async def info_command(spas, args):
 #  {'key': '2024-10-13', 'value': 0.4330909090909091},
 #  {'key': '2024-10-08', 'value': 0.5465454545454546}]
 
-        if args.all or args.energy:
-            energy_usage_day = spa.get_energy_usage(
-                spa.EnergyUsageInterval.DAY,
-                end_date=datetime.date.today(),
-                start_date=datetime.date.today() - datetime.timedelta(days=7),
-            )
+        if args.all or args.energy or args.push2influx:
 
-            print("== Energy usage ==")
-            pp.pprint(await energy_usage_day)
-            print()
+            if args.all or args.energy:
+                energy_usage_day = spa.get_energy_usage(
+                    spa.EnergyUsageInterval.DAY,
+                    end_date=datetime.date.today(),
+                    start_date=datetime.date.today() - datetime.timedelta(days=7),
+                )
+
+                print("== Energy usage ==")
+                pp.pprint(await energy_usage_day)
+                print()
 
 # ## ## ## ## ## DEBUG
 
@@ -254,32 +262,34 @@ async def info_command(spas, args):
 #     'resetCount': 22,
 #     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
-        if args.skipdebug:
-            return ()
+        if args.all or args.lights or args.push2influx:
 
-        data2push = {}
+            if args.skipdebug:
+                return ()
 
-        try:
-            debug_status = await spa.get_debug_status()
-        except Exception as e:
-            logging.info(e)
-            return ()
+            data2push = {}
 
-        if args.all or args.debug:
-            print("== Debug status ==")
-            pp.pprint(debug_status)
-            print()
+            try:
+                debug_status = await spa.get_debug_status()
+            except Exception as e:
+                logging.info(e)
+                return ()
 
-        for thing1 in debug_status:
-            if type(debug_status[thing1]) is dict:
-                for thing2 in debug_status[thing1]:
-                    data2push['debug_' + thing1 + '_' +
-                              thing2] = debug_status[thing1][thing2]
-            else:
-                data2push['debug_' + thing1] = debug_status[thing1]
+            if args.all or args.debug:
+                print("== Debug status ==")
+                pp.pprint(debug_status)
+                print()
 
-        if args.push2influx:
-            push_data(measurement, data2push, {})
+            for thing1 in debug_status:
+                if type(debug_status[thing1]) is dict:
+                    for thing2 in debug_status[thing1]:
+                        data2push['debug_' + thing1 + '_' +
+                                  thing2] = debug_status[thing1][thing2]
+                else:
+                    data2push['debug_' + thing1] = debug_status[thing1]
+
+            if args.push2influx:
+                push_data(measurement, data2push, {})
 
 
 async def set_command(spas, args):
