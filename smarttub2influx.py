@@ -45,10 +45,15 @@ def push_data(measurement, data, tags=None):
 async def info_command(spas, args):
     for spa in spas:
 
-        measurement = spa.name
-
         if args.debug:
             print(f"= Spa '{spa.name}' =\n")
+
+# ## ## ## ## ## PARAMS
+
+        if args.params or args.all:
+            pp.pprint(spa.properties)
+
+        measurement = spa.name
 
 # ## ## ## ## ## STATUS
 
@@ -351,6 +356,7 @@ async def main(argv):
     # this is dumb, fix it TODO
     parser.set_defaults(all=False)
     parser.set_defaults(status=False)
+    parser.set_defaults(params=False)
     parser.set_defaults(lights=False)
     parser.set_defaults(pumps=False)
     parser.set_defaults(errors=False)
@@ -371,7 +377,7 @@ async def main(argv):
         "-a", "--all", action="store_true", default=False,
         help="Show all info except location"
     )
-    info_parser.add_argument("--spas", action="store_true")
+    info_parser.add_argument("--params", action="store_true")
     info_parser.add_argument("--status", action="store_true")
     info_parser.add_argument("--pumps", action="store_true")
     info_parser.add_argument("--lights", action="store_true")
@@ -428,7 +434,6 @@ async def main(argv):
 
         spas = await account.get_spas()
 
-        pp.pprint(args)
         await args.func(spas, args)
 
 
