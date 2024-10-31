@@ -41,9 +41,31 @@ def push_data(measurement, data, tags=None):
     mylogger.logger.debug("Point Json:")
     ic.write_points(json_body)
 
+def assign(key, value, data2push = {}):
+#    print(f"AAAAAAAAAAAAAAAAAAAA key: {key} value: {value}")
+    if type(value) is dict:
+        for k in value:
+            building_k = key + '_' + k
+            assign(building_k, value[k], data2push)
+    elif type(value) is list:
+        k = 1
+        for v in value:
+            building_k = key + '_' + str(k)
+            assign(building_k, v, data2push)
+            k = k + 1
+    else:
+        # test for and handle mpty set
+        if not value:
+            value = 'empty_set'
+        data2push[key]=value
+
+    return(data2push)
+
 
 async def info_command(spas, args):
     for spa in spas:
+
+        measurement = spa.name
 
         if args.debug:
             print(f"= Spa '{spa.name}' =\n")
@@ -53,7 +75,18 @@ async def info_command(spas, args):
         if args.params or args.all:
             pp.pprint(spa.properties)
 
-        measurement = spa.name
+        if args.push2influx:
+
+            data2push = assign('param_selfTest', spa.properties['selfTest'])
+
+            data2push['param_coolingRate'] = spa.properties['coolingRate']
+            data2push['param_ecomode'] = spa.properties['ecomode']
+            data2push['param_equipmentOption'] = spa.properties['equipmentOption']
+            data2push['param_heaterWatts'] = spa.properties['heaterWatts']
+            data2push['param_deviceOnline'] = spa.properties['deviceOnline']
+            data2push['param_volume'] = spa.properties['volume']
+
+            push_data(measurement, data2push)
 
 # ## ## ## ## ## STATUS
 
@@ -76,21 +109,9 @@ async def info_command(spas, args):
                 pp.pprint(status_dict)
                 print()
 
-            data2push = {'status_water_temperature': status_dict['water']['temperature'],
-                         'status_ambient_temperature': status_dict['ambientTemperature'],
-                         'status_current_value': status_dict['current']['value'],
-                         'status_current_kwh': status_dict['current']['kwh'],
-                         'status_heater': status_dict['heater'],
-                         'status_ozone': status_dict['ozone'],
-                         'status_set_temperature': status_dict['setTemperature'],
-                         'status_state': status_dict['state'],
-                         'status_watercare': status_dict['watercare'],
-                         'status_signal_quality': status_dict['signal']['quality'],
-                         'status_signal_strength': status_dict['signal']['strength'],
-                         'status_signal_signalAt': status_dict['signal']['signalAt'],
-                         'status_signal_updateAt': status_dict['signal']['updateAt'],
-                         'status_lastWifi_ssid': status_dict['lastWifi']['ssid'],
-                         'status_lastWifi_lastConnectionTimestamp': status_dict['lastWifi']['lastConnectionTimestamp']}
+            data2push = {}
+            data2push = assign('status', status_dict)
+
             if args.push2influx:
                 push_data(measurement, data2push, {})
 
