@@ -292,7 +292,7 @@ async def info_command(spas, args):
 #     'resetCount': 22,
 #     'uptime': {'connection': 273718, 'system': 274567, 'tubController': 274537}}
 
-        if args.all or args.lights or args.push2influx:
+        if args.all or args.debug or args.push2influx:
 
             if args.skipdebug:
                 return ()
@@ -376,7 +376,6 @@ async def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbosity", action="count", default=0)
     parser.add_argument("--skipdebug", default=False, action="store_true")
-    parser.add_argument("--debug", default=False, action="store_true")
     parser.set_defaults(func=info_command)
     # this is dumb, fix it TODO
     parser.set_defaults(all=False)
@@ -388,6 +387,7 @@ async def main(argv):
     parser.set_defaults(reminders=False)
     parser.set_defaults(energy=False)
     parser.set_defaults(locks=False)
+    parser.set_defaults(debug=False)
 
     parser.set_defaults(push2influx=False)
     parser.set_defaults(info=False)
@@ -410,6 +410,7 @@ async def main(argv):
     info_parser.add_argument("--reminders", action="store_true")
     info_parser.add_argument("--locks", action="store_true")
     info_parser.add_argument("--energy", action="store_true")
+    info_parser.add_argument("--debug", default=False, action="store_true")
 
     set_parser = subparsers.add_parser("set", help="Change settings on the spa")
     set_parser.set_defaults(func=set_command)
