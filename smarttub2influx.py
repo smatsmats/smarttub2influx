@@ -115,6 +115,8 @@ async def info_command(spas, args):
             # make sure this is a float
             if data2push['status_nanoPressure'] == 'empty_set':
                 data2push['status_nanoPressure'] = 0.0
+            if data2push['status_current_average'] == 'empty_set':
+                data2push['status_current_average'] = 0.0
 
             if args.push2influx:
                 push_data(measurement, data2push, {})
