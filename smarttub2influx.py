@@ -112,11 +112,20 @@ async def info_command(spas, args):
             data2push = {}
             data2push = assign('status', status_dict)
 
+            # TODO clean this shiz up
             # make sure this is a float
             if data2push['status_nanoPressure'] == 'empty_set':
+                logging.info(f'forcing status_nanoPressure {data2push['status_nanoPressure']} to 0.0')
                 data2push['status_nanoPressure'] = 0.0
             if data2push['status_current_average'] == 'empty_set':
+                logging.info(f'forcing status_current_average {data2push['status_current_average']} to 0.0')
                 data2push['status_current_average'] = 0.0
+            if data2push['status_current_min'] == 'empty_set':
+                logging.info(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
+                data2push['status_current_min'] = 0.0
+            if data2push['status_current_value'] == 'empty_set':
+                logging.info(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
+                data2push['status_current_value'] = 0.0
 
             if args.push2influx:
                 push_data(measurement, data2push, {})
