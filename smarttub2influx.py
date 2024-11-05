@@ -56,8 +56,9 @@ def assign(key, value, data2push = {}):
     else:
         # test for and handle mpty set
         if not value:
-            value = 'empty_set'
-        data2push[key]=value
+            pass
+        else:
+            data2push[key]=value
 
     return(data2push)
 
@@ -114,18 +115,30 @@ async def info_command(spas, args):
 
             # TODO clean this shiz up
             # make sure this is a float
-            if data2push['status_nanoPressure'] == 'empty_set':
-                logging.info(f'forcing status_nanoPressure {data2push['status_nanoPressure']} to 0.0')
-                data2push['status_nanoPressure'] = 0.0
-            if data2push['status_current_average'] == 'empty_set':
-                logging.info(f'forcing status_current_average {data2push['status_current_average']} to 0.0')
-                data2push['status_current_average'] = 0.0
-            if data2push['status_current_min'] == 'empty_set':
-                logging.info(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
-                data2push['status_current_min'] = 0.0
-            if data2push['status_current_value'] == 'empty_set':
-                logging.info(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
-                data2push['status_current_value'] = 0.0
+#            if type(data2push['status_sensors_4_age']) != str:
+#                logging.warning(f'forcing status_sensors_4_age {data2push['status_sensors_4_age']} to string')
+#                data2push['status_sensors_4_age'] = str(data2push['status_sensors_4_age'])
+#            if type(data2push['status_sensors_4_missedCount']) != str:
+#                logging.warning(f'forcing status_sensors_4_missed {data2push['status_sensors_4_missedCount']} to string')
+#                data2push['status_sensors_4_missedCount'] = str(data2push['status_sensors_4_missedCount'])
+#            if type(data2push['status_signal_quality']) != int:
+#                logging.warning(f'forcing status_signal_quality {data2push['status_signal_quality']} to int')
+#                data2push['status_signal_quality'] = 0
+#            if type(data2push['status_signal_strength']) != int:
+#                logging.warning(f'forcing status_signal_strength {data2push['status_signal_quality']} to int')
+#                data2push['status_signal_strength'] = 0
+#            if data2push['status_nanoPressure'] == 'empty_set':
+#                logging.warning(f'forcing status_nanoPressure {data2push['status_nanoPressure']} to 0.0')
+#                data2push['status_nanoPressure'] = 0.0
+#            if data2push['status_current_average'] == 'empty_set':
+#                logging.warning(f'forcing status_current_average {data2push['status_current_average']} to 0.0')
+#                data2push['status_current_average'] = 0.0
+#            if data2push['status_current_min'] == 'empty_set':
+#                logging.warning(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
+#                data2push['status_current_min'] = 0.0
+#            if data2push['status_current_value'] == 'empty_set':
+#                logging.warning(f'forcing status_current_value {data2push['status_current_value']} to 0.0')
+#                data2push['status_current_value'] = 0.0
 
             if args.push2influx:
                 push_data(measurement, data2push, {})
