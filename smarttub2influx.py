@@ -41,8 +41,12 @@ def push_data(measurement, data, tags=None):
     mylogger.logger.debug("Point Json:")
     ic.write_points(json_body)
 
-def assign(key, value, data2push = {}):
+def assign(key, value, data2push=None):
 #    print(f"AAAAAAAAAAAAAAAAAAAA key: {key} value: {value}")
+
+    if data2push is None:
+        data2push = {}
+
     if type(value) is dict:
         for k in value:
             building_k = key + '_' + k
@@ -54,7 +58,7 @@ def assign(key, value, data2push = {}):
             assign(building_k, v, data2push)
             k = k + 1
     else:
-        # test for and handle mpty set
+        # test for and handle empty set
         if not value:
             pass
         else:
