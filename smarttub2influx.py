@@ -64,7 +64,7 @@ def assign(key, value, data2push=None):
         else:
             data2push[key]=value
 
-    return(data2push)
+    return data2push 
 
 
 async def info_command(spas, args):
@@ -281,6 +281,13 @@ async def info_command(spas, args):
 
             if args.all or args.locks:
                 print("== Locks ==")
+
+            # make sure we have the status before using it
+            try:
+                status
+            except UnboundLocalError:
+                status = await spa.get_status_full()
+
             for lock in status.locks.values():
                 data2push['locks_' + lock.kind + '_state'] = lock.state
                 if args.all or args.locks:
