@@ -58,8 +58,8 @@ def assign(key, value, data2push=None):
             assign(building_k, v, data2push)
             k = k + 1
     else:
-        # test for and handle empty set
-        if not value:
+        # test for and handle None value
+        if value is None:
             pass
         else:
             data2push[key]=value
