@@ -118,7 +118,10 @@ async def info_command(spas, args):
             data2push = assign('status', status_dict)
 
             # TODO clean this shiz up
-            # make sure this is a float
+            # make sure this is a int
+            if type(data2push['status_sensors_2_voltage']) != int:
+                logging.info(f'forcing status_sensors_2_voltage {data2push['status_sensors_2_voltage']} to int')
+                data2push['status_sensors_2_voltage'] = int(data2push['status_sensors_2_voltage'])
 #            if type(data2push['status_sensors_4_age']) != str:
 #                logging.warning(f'forcing status_sensors_4_age {data2push['status_sensors_4_age']} to string')
 #                data2push['status_sensors_4_age'] = str(data2push['status_sensors_4_age'])
