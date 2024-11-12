@@ -237,7 +237,9 @@ async def info_command(spas, args):
 
             # leaving this outside of debug to let us know if we get any errors
             for error in await spa.get_errors():
-                print(error)
+                if not args.noerrors:
+                    print(error)
+                logging.info(error)
 
             if args.all or args.errors:
                 print()
@@ -422,6 +424,7 @@ async def main(argv):
     parser.set_defaults(lights=False)
     parser.set_defaults(pumps=False)
     parser.set_defaults(errors=False)
+    parser.set_defaults(noerrors=False)
     parser.set_defaults(reminders=False)
     parser.set_defaults(energy=False)
     parser.set_defaults(locks=False)
@@ -433,6 +436,7 @@ async def main(argv):
     subparsers = parser.add_subparsers()
     push_parser = subparsers.add_parser("push2influx", help="Populate Influx")
     push_parser.set_defaults(push2influx=True)
+    push_parser.add_argument("--noerrors", action="store_true")
 
     info_parser = subparsers.add_parser("info", help="Show information about the spa")
     info_parser.set_defaults(info=True)
@@ -445,6 +449,7 @@ async def main(argv):
     info_parser.add_argument("--pumps", action="store_true")
     info_parser.add_argument("--lights", action="store_true")
     info_parser.add_argument("--errors", action="store_true")
+    info_parser.add_argument("--noerrors", action="store_true")
     info_parser.add_argument("--reminders", action="store_true")
     info_parser.add_argument("--locks", action="store_true")
     info_parser.add_argument("--energy", action="store_true")
