@@ -495,6 +495,10 @@ async def main(argv):
         st = SmartTub(session)
         try:
             await st.login(myconfig.config["smarttub"]["username"], myconfig.config["smarttub"]["password"])
+
+            account = await st.get_account()
+
+            spas = await account.get_spas()
         except Exception as e:
             logging.error(e)
             sys.exit(1)
