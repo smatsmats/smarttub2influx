@@ -22,8 +22,7 @@ from smarttub import SmartTub, SpaLight
 
 pp = pprint.PrettyPrinter(indent=4)
 
-verbose = 0
-directory_base = "."
+
 
 
 def push_data(measurement, data, tags=None):
@@ -47,11 +46,11 @@ def assign(key, value, data2push=None):
     if data2push is None:
         data2push = {}
 
-    if type(value) is dict:
+    if isinstance(value, dict):
         for k in value:
             building_k = key + '_' + k
             assign(building_k, value[k], data2push)
-    elif type(value) is list:
+    elif isinstance(value, list):
         k = 1
         for v in value:
             building_k = key + '_' + str(k)
@@ -120,7 +119,7 @@ async def info_command(spas, args):
             # TODO clean this shiz up
             # make sure this is a int
             if type(data2push['status_sensors_2_voltage']) != int:
-                logging.info(f'forcing status_sensors_2_voltage {data2push['status_sensors_2_voltage']} to int')
+                logging.info(f'forcing status_sensors_2_voltage {data2push["status_sensors_2_voltage"]} to int')
                 data2push['status_sensors_2_voltage'] = int(data2push['status_sensors_2_voltage'])
 #            if type(data2push['status_sensors_4_age']) != str:
 #                logging.warning(f'forcing status_sensors_4_age {data2push['status_sensors_4_age']} to string')
