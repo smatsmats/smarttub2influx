@@ -48,20 +48,20 @@ def assign(key, value, data2push=None):
 
     if isinstance(value, dict):
         for k in value:
-            building_k = key + '_' + k
+            building_k = k + '_' + k
             assign(building_k, value[k], data2push)
     elif isinstance(value, list):
-        k = 1
+        k_seq = 1
         for v in value:
-            building_k = key + '_' + str(k)
+            building_k = key + '_' + str(k_seq)
             assign(building_k, v, data2push)
-            k = k + 1
+            k_seq = k_seq + 1
     else:
         # test for and handle None value
         if value is None:
             pass
         else:
-            data2push[key]=value
+            data2push[key] = value
 
     return data2push 
 
@@ -214,9 +214,10 @@ async def info_command(spas, args):
                         light_mode = light.mode.name + "_" + str(light.cycleSpeed)
                     else:
                         light_mode = light.mode.name
-                    data2push = {'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                    data2push = {
                                  'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
-                                 'lights_' + LightZone(light.zone).name + '_mode': light_mode,
+#                                 'lights_' + LightZone(light.zone).name + '_mode': light_mode,
+                                 'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
                                  'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
                                  'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
                                  'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
