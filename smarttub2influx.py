@@ -118,7 +118,7 @@ async def info_command(spas, args):
 
             # TODO clean this shiz up
             # make sure this is a int
-            if type(data2push['status_sensors_2_voltage']) != int:
+            if 'status_sensors_2_voltage' in data2push and type(data2push['status_sensors_2_voltage']) != int:
                 logging.info(f'forcing status_sensors_2_voltage {data2push["status_sensors_2_voltage"]} to int')
                 data2push['status_sensors_2_voltage'] = int(data2push['status_sensors_2_voltage'])
 #            if type(data2push['status_sensors_4_age']) != str:
