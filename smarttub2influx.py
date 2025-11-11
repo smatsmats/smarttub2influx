@@ -503,6 +503,10 @@ async def main(argv):
             logging.error(e)
             sys.exit(1)
 
+        account = await st.get_account()
+
+        spas = await account.get_spas()
+
         await args.func(spas, args)
 
 
