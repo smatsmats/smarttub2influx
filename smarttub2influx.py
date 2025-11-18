@@ -211,16 +211,28 @@ async def info_command(spas, args):
                     if args.all or args.lights:
                         print(light)
                     if light.mode.name == 'COLOR_WHEEL':
-                        light_mode = light.mode.name + "_" + str(light.cycleSpeed)
+                        # cycleSpeed is on a branch and not guaranteed present
+                        try:
+                            light_mode = light.mode.name + "_" + str(light.cycleSpeed)
+                        except AttributeError:
+                            light_mode = light.mode.name
                     else:
                         light_mode = light.mode.name
-                    data2push = {
+                    try:
+                        data2push = {
                                  'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
 #                                 'lights_' + LightZone(light.zone).name + '_mode': light_mode,
                                  'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
                                  'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
                                  'lights_' + LightZone(light.zone).name + '_intensity': light.intensity,
                                  'lights_' + LightZone(light.zone).name + '_cycle_speed': light.cycleSpeed}
+                    except AttributeError:
+                        data2push = {
+                                 'lights_' + LightZone(light.zone).name + '_mode_raw': light.mode.name,
+#                                 'lights_' + LightZone(light.zone).name + '_mode': light_mode,
+                                 'lights_' + LightZone(light.zone).name + '_mode': light.mode.name,
+                                 'lights_' + LightZone(light.zone).name + '_color': light.red + light.green + light.blue + light.white,
+                                 'lights_' + LightZone(light.zone).name + '_intensity': light.intensity}
                     if args.push2influx:
                         push_data(measurement, data2push, {})
             except KeyError as e:
