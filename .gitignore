@@ -1,5 +1,9 @@
+logs/
 config/config.yml
 config/logging.yml
+
+PROD
+DEV
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
